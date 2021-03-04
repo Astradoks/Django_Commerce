@@ -1,0 +1,89 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>Listing: {{auction.title}}</h2>
+    {% if not auction.active %}
+        <h2>Closed Auction</h2>
+    {% endif %}
+    <br>
+
+    <div class="row">
+        <div class="col-md-8 auction">
+            <img src="{{auction.image}}" alt="{{auction.title}}">
+        </div>
+        <div class="col-md-4">
+            <form action="{% url 'watchlist' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="auction_id" value="{{auction.id}}">
+                {% if in_watchlist %}
+                    <input type="submit" value="Remove from Watchlist" class="btn btn-outline-danger btn-sm">
+                {% else %}
+                    <input type="submit" value="Ad to Watchlist" class="btn btn-outline-success btn-sm">
+                {% endif %}
+            </form>
+            <br>
+            <h4>Initial bid: ${{auction.initial_bid}}</h4>
+            <h4>Max bid: ${{max_bid}}</h4>
+            {% if max_bid == auction.initial_bid %}
+                <h6>There aren't bids yet!</h6>
+            {% elif max_buyer == logged_user and not auction.active %}
+                <h4>You won the auction!</h4>
+            {% elif max_buyer == logged_user %}
+                <h6>You are the best buyer!</h6>
+            {% else %}
+                <h6>Best buyer: {{max_buyer}}</h6>
+            {% endif %}
+            <br>
+            {% if message %}
+                <div class="alert alert-dismissible alert-{{message_category}}">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <strong>{{message}}</strong>
+                </div>
+            {% endif %}
+            <form action="{% url 'bid' %}" method="post">
+                {% csrf_token %}
+                <input type="number" class="form-control" min="{{max_bid}}" name="bid" placeholder="Place a bid" required>
+                <input type="hidden" name="auction_id" value="{{auction.id}}">
+                <br>
+                <input type="submit" value="Place Bid" class="btn btn-block btn-primary">
+            </form>
+            <br>
+            {% if possible_close and auction.active %}
+                <form action="{% url 'active' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="auction_id" value="{{auction.id}}">
+                    <input type="submit" value="Close Auction" class="btn btn-block btn-outline-danger">
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+    <h4>Description</h4>
+    <p>{{auction.description}}</p>
+    <br>
+    <h6>Category: {{auction.category}}</h6>
+    <h6>Listed by: {{auction.user}}</h6>
+    <br>
+    <div class="container">
+        <h4>Comments</h4>
+        {% for comment in comments %}
+            <div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ comment.user }}</h5>
+                    <p class="card-text">{{ comment.comment }}</p>
+                </div>
+            </div>
+        {% empty %}
+            <p>There are no comments yet. Be the first one!</p>
+        {% endfor %}
+        <form action="{% url 'comment' %}" method="post">
+            {% csrf_token %}
+            {{ comment_form }}
+            <br>
+            <input type="hidden" name="auction_id" value="{{ auction.id }}">
+            <input type="submit" value="Comment" class="btn btn-block btn-primary">
+        </form>
+    </div>
+
+{% endblock %}

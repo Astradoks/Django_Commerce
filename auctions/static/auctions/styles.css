@@ -1,0 +1,19 @@
+body {
+    padding: 10px;
+}
+.card{
+    padding: 10px;
+    height: 250px;
+}
+.card img{
+    max-height: 230px;
+    max-width: 95%;
+}
+.auction img{
+    height: 100%;
+    width: 100%;
+}
+.auction_link, .auction_link:hover{
+    text-decoration: none;
+    color: black;
+}
